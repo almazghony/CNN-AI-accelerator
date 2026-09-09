@@ -3,7 +3,7 @@
 `include "kernel_mem.sv"
 `include "global_ctrl.sv"
 `include "input_ctrl.sv"
-`include "sd.sv"
+`include "sliding_window.sv"
 `include "processing_element.sv"
 `include "MAC_array.sv"
 `include "accumulator.sv"
