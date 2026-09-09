@@ -1,0 +1,62 @@
+module output_ctrl
+    import conv_pkg::*;
+
+(
+    input  logic                clk,
+    input  logic                rst_n,
+    input  logic [OUT_W-1:0]    pixel_in,
+    input  logic                pixel_valid,
+    input  logic [15:0]         out_f_w,
+    input  logic [15:0]         out_f_h,
+    output logic [OUT_W-1:0]    pixel_out,  
+    output logic                pixel_out_valid,
+    output logic                done
+);
+
+    logic [15:0] row_cnt;
+    logic [15:0] col_cnt;
+
+    // Output feature-map dimensions (valid convolution, stride = 1)
+
+    logic        end_of_row;
+    logic        last_pixel;
+
+    assign end_of_row   = (col_cnt == out_f_w - 1);
+    assign last_pixel   = (row_cnt == out_f_h - 1) && end_of_row;
+
+    // Single-cycle done pulse on the final output pixel
+    always_ff @(posedge clk) begin
+        if(!rst_n)
+            done <= 0;
+        else
+            done <= pixel_valid && last_pixel;
+    end
+
+    always_ff @(posedge clk) begin
+        if(!rst_n) begin
+            row_cnt <= 0;
+            col_cnt <= 0;
+        end
+        else if (done) begin
+            row_cnt <= 0;
+            col_cnt <= 0;
+        end
+        else if(pixel_valid) begin
+            if(end_of_row) begin
+                col_cnt <= 0;
+
+                if(last_pixel)
+                    row_cnt <= 0;
+                else
+                    row_cnt <= row_cnt + 1;
+            end
+
+            else
+                col_cnt <= col_cnt + 1;
+        end
+    end
+
+    assign pixel_out_valid  = pixel_valid;
+    assign pixel_out        = pixel_in;
+
+endmodule
