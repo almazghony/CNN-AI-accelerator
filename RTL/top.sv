@@ -10,15 +10,12 @@ module top
     output logic                            done,
     output logic                            busy,
     // Configuration (Directly to cfg.sv)
-    input  logic [15:0]                     cfg_img_width,
-    input  logic [15:0]                     cfg_img_height,
-    input  logic                            cfg_relu_en,
-    input  logic [4:0]                      cfg_shift_amt,
-    input  logic                            cfg_round_en,
+    // input  logic [7:0]                      cfg_img_width,
+    // input  logic [7:0]                      cfg_img_height,
 
     // Kernel Loading
     input  logic                            kernel_we,
-    input  logic [$clog2(K_DIM*K_DIM)-1:0]  kernel_addr,
+    input  logic [K_ADDR_W-1:0]             kernel_addr,
     input  logic [WGT_WIDTH-1:0]            kernel_data,
 
     // Input Image Stream (Directly to input_ctrl.sv)
@@ -35,11 +32,8 @@ module top
     // ---------------------------------------------------------------------
     
     // Config outputs
-    logic [15:0]            img_width;
-    logic [15:0]            img_height;
-    logic                   relu_en;
-    logic [4:0]             shift_amt;
-    logic                   round_en;
+    // logic [15:0]            img_width;
+    // logic [15:0]            img_height;
 
     // Global control
     logic                   processing_en;
@@ -72,31 +66,25 @@ module top
     logic [OUT_W-1:0]       fmt_pixel_out;
     logic                   fmt_pixel_valid;
     
-    logic [15:0]            out_f_w;
-    logic [15:0]            out_f_h;
+    // logic [15:0]            out_f_w;
+    // logic [15:0]            out_f_h;
 
     // ---------------------------------------------------------------------
     // Module Instantiations
     // ---------------------------------------------------------------------
 
     // 1. Configuration
-    cfg u_cfg (
-        .clk            (clk),
-        .rst_n          (rst_n),
-        .busy           (busy),
-        .cfg_img_width  (cfg_img_width),
-        .cfg_img_height (cfg_img_height),
-        .cfg_relu_en    (cfg_relu_en),
-        .cfg_shift_amt  (cfg_shift_amt),
-        .cfg_round_en   (cfg_round_en),
-        .img_width      (img_width),
-        .img_height     (img_height),
-        .relu_en        (relu_en),
-        .shift_amt      (shift_amt),
-        .round_en       (round_en),
-        .out_f_w        (out_f_w),
-        .out_f_h        (out_f_h)
-    );
+    // cfg u_cfg (
+    //     .clk            (clk),
+    //     .rst_n          (rst_n),
+    //     .busy           (busy),
+    //     // .cfg_img_width  (cfg_img_width),
+    //     // .cfg_img_height (cfg_img_height),
+    //     .img_width      (img_width),
+    //     .img_height     (img_height),
+    //     .out_f_w        (out_f_w),
+    //     .out_f_h        (out_f_h)
+    // );
 
     // 2. Global Controller
     global_ctrl u_global_ctrl (
@@ -113,8 +101,8 @@ module top
     input_ctrl u_input_ctrl (
         .clk            (clk),
         .rst_n          (rst_n),
-        .img_width      (img_width),
-        .img_height     (img_height),
+        // .img_width      (img_width),
+        // .img_height     (img_height),
         .processing_en  (processing_en),
         .pixel_in       (pixel_in),
         .pixel_valid    (pixel_valid),
@@ -172,7 +160,6 @@ module top
     relu u_relu (
         .conv_result    (conv_result),
         .conv_valid     (conv_valid),
-        .relu_en        (relu_en),
         .relu_result    (relu_result),
         .relu_valid     (relu_valid)
     );
@@ -181,8 +168,6 @@ module top
     output_formatter u_output_formatter (
         .relu_result    (relu_result),
         .relu_valid     (relu_valid),
-        .shamt          (shift_amt),
-        .round_en       (round_en),
         .pixel_out      (fmt_pixel_out),
         .pixel_valid    (fmt_pixel_valid)
     );
@@ -191,8 +176,8 @@ module top
     output_ctrl u_output_ctrl (
         .clk            (clk),
         .rst_n          (rst_n),
-        .out_f_w        (out_f_w),
-        .out_f_h        (out_f_h),
+        // .out_f_w        (out_f_w),
+        // .out_f_h        (out_f_h),
         .pixel_in       (fmt_pixel_out),
         .pixel_valid    (fmt_pixel_valid),
         .pixel_out      (pixel_out),

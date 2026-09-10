@@ -22,7 +22,9 @@ package conv_pkg;
     parameter int PARTIAL_W = PROD_W + $clog2(K_DIM);
     parameter int ACC_W     = PARTIAL_W + $clog2(K_DIM);
     
-
+    parameter bit RELU_EN   = 1; 
+    parameter bit ROUND_EN  = 1; 
+    parameter int SHIFT_AMT = 1;  
 
 endpackage
 

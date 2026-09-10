@@ -6,8 +6,8 @@ module output_ctrl
     input  logic                rst_n,
     input  logic [OUT_W-1:0]    pixel_in,
     input  logic                pixel_valid,
-    input  logic [15:0]         out_f_w,
-    input  logic [15:0]         out_f_h,
+    // input  logic [15:0]         out_f_w,
+    // input  logic [15:0]         out_f_h,
     output logic [OUT_W-1:0]    pixel_out,  
     output logic                pixel_out_valid,
     output logic                done
@@ -21,8 +21,8 @@ module output_ctrl
     logic        end_of_row;
     logic        last_pixel;
 
-    assign end_of_row   = (col_cnt == out_f_w - 1);
-    assign last_pixel   = (row_cnt == out_f_h - 1) && end_of_row;
+    assign end_of_row   = (col_cnt == OUT_F_W - 1);
+    assign last_pixel   = (row_cnt == OUT_F_H - 1) && end_of_row;
 
     // Single-cycle done pulse on the final output pixel
     always_ff @(posedge clk) begin

@@ -4,11 +4,10 @@ module relu
 (
     input   logic signed [ACC_W-1:0]    conv_result,
     input   logic                       conv_valid,
-    input   logic                       relu_en,
     output  logic [ACC_W-1:0]           relu_result,
     output  logic                       relu_valid
 );
 
-    assign relu_result = (relu_en && conv_result[ACC_W-1]) ? '0 : conv_result;
+    assign relu_result = (RELU_EN && conv_result[ACC_W-1]) ? '0 : conv_result;
     assign relu_valid  = conv_valid;
 endmodule

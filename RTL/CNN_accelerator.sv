@@ -1,5 +1,5 @@
 `include "conv_pkg.sv"
-`include "cfg.sv"
+// `include "cfg.sv"
 `include "kernel_mem.sv"
 `include "global_ctrl.sv"
 `include "input_ctrl.sv"

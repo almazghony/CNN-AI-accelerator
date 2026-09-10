@@ -4,8 +4,8 @@ module input_ctrl
 (
     input  logic                    clk,
     input  logic                    rst_n,
-    input  logic [15:0]             img_width,
-    input  logic [15:0]             img_height,
+    // input  logic [15:0]             img_width,
+    // input  logic [15:0]             img_height,
     input  logic                    processing_en,
 
     
@@ -27,9 +27,6 @@ module input_ctrl
     // assign pixel_out_valid  = accept;
     // assign row_idx       = row_cnt;
     // assign col_idx       = col_cnt;
-    // assign end_of_row       = (col_cnt == img_width);
-    // assign end_of_frame     = (row_cnt == img_height-1) && end_of_row;
-    // assign image_done    = accept && end_of_frame;
 
 
     always_ff @(posedge clk) begin
@@ -55,7 +52,7 @@ module input_ctrl
                 col_cnt <= col_cnt + 1;
         end
     end
-    assign end_of_row = (col_cnt == img_width-1);
-    assign end_of_frame = (row_cnt == img_height-1) && end_of_row;
+    assign end_of_row = (col_cnt == IMG_MAX_W-1);
+    assign end_of_frame = (row_cnt == IMG_MAX_H-1) && end_of_row;
     assign pixel_out_valid = processing_en && pixel_valid && rst_n; 
 endmodule

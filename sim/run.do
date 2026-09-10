@@ -3,7 +3,6 @@ vlib work
 vlog -f files.f
 vsim -voptargs=+acc work.tb_top
 add wave -group "top"                       /tb_top/dut/*
-add wave -group "u_cfg"                     /tb_top/dut/u_cfg/*
 add wave -group "TB"                        /tb_top/* /tb_top/result /tb_top/image
 add wave -group "u_global_ctrl"             /tb_top/dut/u_global_ctrl/*
 add wave -group "u_input_ctrl"              /tb_top/dut/u_input_ctrl/*

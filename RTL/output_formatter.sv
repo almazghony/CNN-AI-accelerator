@@ -4,8 +4,6 @@ module output_formatter
 (
     input  logic signed [ACC_W-1:0] relu_result,
     input  logic                    relu_valid,
-    input  logic [4:0]              shamt,
-    input  logic                    round_en,
     output logic [OUT_W-1:0]        pixel_out,
     output logic                    pixel_valid
 );
@@ -26,12 +24,12 @@ module output_formatter
 
         // Optional rounding (bias = half the divisor)
             assign biased_result = 
-                (round_en && (shamt != 0))? extended_result + (CALC_W'(1) << (shamt - 1)) 
+                (ROUND_EN && (SHIFT_AMT != 0))? extended_result + (CALC_W'(1) << (SHIFT_AMT - 1)) 
                 : extended_result;
 
 
         // Scaling
-        assign scaled_result = biased_result >>> shamt;
+        assign scaled_result = biased_result >>> SHIFT_AMT;
 
         // Saturation
         always_comb begin
@@ -70,16 +68,16 @@ endmodule
 // An arithmetic right shift:
 
 // ```systemverilog
-// scaled = result >>> shamt;
+// scaled = result >>> SHIFT_AMT;
 // ```
 
-// divides the value by `2^shamt` while preserving the sign.
+// divides the value by `2^SHIFT_AMT` while preserving the sign.
 
 // Example:
 
 // ```text
 // result = 1024
-// shamt  = 4
+// SHIFT_AMT  = 4
 // output = 1024 >>> 4 = 64
 // ```
 
@@ -96,7 +94,7 @@ endmodule
 
 // ```text
 // result = 7
-// shamt  = 1
+// SHIFT_AMT  = 1
 // 7 >>> 1 = 3
 // ```
 
