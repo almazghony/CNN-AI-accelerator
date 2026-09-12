@@ -24,10 +24,6 @@ module input_ctrl
 
     wire   accept           = processing_en && pixel_valid;
     assign pixel_out        = pixel_in;
-    // assign pixel_out_valid  = accept;
-    // assign row_idx       = row_cnt;
-    // assign col_idx       = col_cnt;
-
 
     always_ff @(posedge clk) begin
         if(!rst_n) begin
@@ -35,8 +31,10 @@ module input_ctrl
             col_cnt <= 0;
         end
         else if (!processing_en)begin
-            row_cnt <= 0;
-            col_cnt <= 0;
+            row_cnt         <= 0;
+            col_cnt         <= 0;
+            end_of_row      <= 0;
+            end_of_frame    <= 0;
         end
         else if(accept) begin
             if(end_of_row) begin
@@ -54,5 +52,5 @@ module input_ctrl
     end
     assign end_of_row = (col_cnt == IMG_MAX_W-1);
     assign end_of_frame = (row_cnt == IMG_MAX_H-1) && end_of_row;
-    assign pixel_out_valid = processing_en && pixel_valid && rst_n; 
+    assign pixel_out_valid = processing_en && pixel_valid;
 endmodule

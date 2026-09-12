@@ -8,7 +8,7 @@ module top
     // Control
     input  logic                            start,
     output logic                            done,
-    output logic                            busy,
+    output logic                            processing_en,
     // Configuration (Directly to cfg.sv)
     // input  logic [7:0]                      cfg_img_width,
     // input  logic [7:0]                      cfg_img_height,
@@ -36,7 +36,6 @@ module top
     // logic [15:0]            img_height;
 
     // Global control
-    logic                   processing_en;
     logic                   output_done;
 
     // Datapath streams
@@ -77,7 +76,7 @@ module top
     // cfg u_cfg (
     //     .clk            (clk),
     //     .rst_n          (rst_n),
-    //     .busy           (busy),
+    //     .processing_en           (processing_en),
     //     // .cfg_img_width  (cfg_img_width),
     //     // .cfg_img_height (cfg_img_height),
     //     .img_width      (img_width),
@@ -92,7 +91,6 @@ module top
         .rst_n          (rst_n),
         .start          (start),
         .output_done    (output_done),
-        .busy           (busy),
         .done           (done),
         .processing_en  (processing_en)
     );
@@ -141,6 +139,7 @@ module top
     MAC_array u_MAC_array (
         .clk            (clk),
         .rst_n          (rst_n), 
+        .processing_en  (processing_en),
         .window         (window),
         .window_valid   (window_valid),
         .kernel_coeffs  (kernel_coeffs),

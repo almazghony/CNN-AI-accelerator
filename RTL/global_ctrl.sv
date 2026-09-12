@@ -4,7 +4,6 @@ module global_ctrl
 	input   wire    logic    rst_n, 
 	input   wire    logic    start, 
 	input   wire    logic    output_done,
-	output          logic    busy, 
 	output          logic    done,
     output          logic    processing_en
 );
@@ -44,24 +43,20 @@ module global_ctrl
             IDLE: begin
                 processing_en = 0;
                 done          = 0;
-                busy          = 0;
             end
 
             PROCESSING: begin
                 processing_en = 1;
-                busy          = 1;
                 done          = 0;
             end
 
             DONE: begin
                 processing_en = 0;
-                busy          = 0;
                 done          = 1;
             end
 
             default: begin
                 processing_en = 0;
-                busy          = 0;
                 done          = 0;
             end
         endcase

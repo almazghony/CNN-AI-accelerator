@@ -14,13 +14,10 @@ module kernel_mem
     logic signed [WGT_WIDTH-1:0] kernel_mem [0:K_DIM*K_DIM-1];
 
 
-    always_ff @(posedge clk) begin
-        //Kernel contents are undefined after reset.
+    always_ff @(posedge clk)
         //The kernel must always be programmed by software/testbench before START
-        //the accelerator never assumes a default kernel.
-            if(!processing_en && kernel_we)
-                    kernel_mem[kernel_addr] <= kernel_data;
-    end
+        if(!processing_en && kernel_we)
+                kernel_mem[kernel_addr] <= kernel_data;
 
     
     generate

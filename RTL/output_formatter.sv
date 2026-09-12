@@ -35,8 +35,10 @@ module output_formatter
         always_comb begin
             if(scaled_result > MAX_OUT)
                 pixel_out = MAX_OUT[15:0];
+
             else if(scaled_result < MIN_OUT)
                 pixel_out = MIN_OUT[15:0];
+                
             else
                 pixel_out = scaled_result[15:0];
         end
@@ -44,73 +46,61 @@ module output_formatter
         assign pixel_valid = relu_valid;
 endmodule
 
+// The choice is rounding + arithmetic shifting + saturation because it gives the best accuracy while still guaranteeing a valid 16-bit  output.
 
+//  Purpose of each stage
 
-
-
-
-
-
-
-
-
-
-
-// The choice is **rounding + arithmetic shifting + saturation** because it gives the best accuracy while still guaranteeing a valid 16-bit  output.
-
-// ### Purpose of each stage
-
-// #### 1. Shifting
-// Purpose: **scale the accumulator result down to the output precision.**
+//  1. Shifting
+// Purpose: scale the accumulator result down to the output precision.
 
 // The convolution accumulator usually has more bits than the final output. If the accumulator is, for example, 32 bits but the output must be 16 bits, the value must be reduced.
 
 // An arithmetic right shift:
 
-// ```systemverilog
+// systemverilog
 // scaled = result >>> SHIFT_AMT;
-// ```
+// 
 
 // divides the value by `2^SHIFT_AMT` while preserving the sign.
 
 // Example:
 
-// ```text
+// text
 // result = 1024
 // SHIFT_AMT  = 4
 // output = 1024 >>> 4 = 64
-// ```
+// 
 
-// So shifting is used for **scaling/truncation**.
+// So shifting is used for scaling/truncation.
 
 // ---
 
-// #### 2. Rounding
-// Purpose: **reduce precision loss caused by shifting.**
+//  2. Rounding
+// Purpose: reduce precision loss caused by shifting.
 
 // If you only shift, low bits are discarded. This is equivalent to truncation, which introduces error.
 
 // Example without rounding:
 
-// ```text
+// text
 // result = 7
 // SHIFT_AMT  = 1
 // 7 >>> 1 = 3
-// ```
+// 
 
 // But mathematically:
 
-// ```text
+// text
 // 7 / 2 = 3.5
-// ```
+// 
 
 // So truncation loses `0.5`.
 
 // With rounding, you add half of the divisor before shifting:
 
-// ```text
+// text
 // rounded = (7 + 1) >>> 1 = 4
-// ```
+// 
 
 // This is closer to the ideal result.
 
@@ -118,68 +108,68 @@ endmodule
 
 // ---
 
-// #### 3. Saturation
-// Purpose: **prevent overflow from producing invalid output values.**
+//  3. Saturation
+// Purpose: prevent overflow from producing invalid output values.
 
 // After scaling and rounding, the value may still be outside the 16-bit signed range:
 
-// ```text
+// text
 // minimum = -32768
 // maximum = +32767
-// ```
+// 
 
 // If the value is too large, saturation forces it to the maximum:
 
-// ```text
+// text
 // value > 32767  → output = 32767
-// ```
+// 
 
 // If the value is too negative, saturation forces it to the minimum:
 
-// ```text
+// text
 // value < -32768 → output = -32768
-// ```
+// 
 
 // This is better than wraparound overflow, where a large positive number could incorrectly become negative.
 
 // ---
 
-// ### Why this choice is good
+//  Why this choice is good
 
 // The chosen method is:
 
-// ```text
+// text
 // rounding → arithmetic shift → saturation
-// ```
+// 
 
 // or equivalently, if rounding is done before shifting:
 
-// ```text
+// text
 // add rounding bias → arithmetic shift → saturation
-// ```
+// 
 
 // This choice is good because:
 
-// 1. **It preserves sign correctly**  
+// 1. It preserves sign correctly  
 //    Arithmetic right shift keeps negative values negative.
 
-// 2. **It improves accuracy**  
+// 2. It improves accuracy  
 //    Rounding gives a value closer to the true scaled result than pure truncation.
 
-// 3. **It guarantees valid 16-bit signed output**  
+// 3. It guarantees valid 16-bit signed output  
 //    Saturation ensures the result is always inside `[-32768, 32767]`.
 
-// 4. **It is hardware-efficient**  
+// 4. It is hardware-efficient  
 //    It only needs adders, shifters, and comparators. No DSPs or memory are required.
 
-// 5. **It satisfies the competition requirement**  
+// 5. It satisfies the competition requirement  
 //    The final output is at least 16-bit signed, and the handling of overflow, truncation, rounding, and saturation is clearly defined.
 
-// ### Short justification
+//  Short justification
 
-// Use **shifting** to scale the wide accumulator result, **rounding** to reduce truncation error, and **saturation** to prevent overflow. This gives the best practical tradeoff between precision, correctness, and hardware cost.
+// Use shifting to scale the wide accumulator result, rounding to reduce truncation error, and saturation to prevent overflow. This gives the best practical tradeoff between precision, correctness, and hardware cost.
 
-// ### Sources
+//  Sources
 // 1. Provided competition specification.  
 // 2. Provided `output_formatter.sv` module specification.  
 // 3. IEEE Std 1800-2017 SystemVerilog LRM: signed arithmetic shift `>>>`, signed comparisons, and bit-width extension rules.

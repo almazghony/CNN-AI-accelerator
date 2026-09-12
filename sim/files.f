@@ -1,2 +1,2 @@
-../RTL/CNN_accelerator.sv 
-../tb/tb_top.sv
+../RTL/CNN_accelerator.sv
+../UVM/top_uvm.sv

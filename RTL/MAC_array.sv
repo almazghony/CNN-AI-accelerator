@@ -3,19 +3,37 @@ import conv_pkg::*;
 (
     input  logic                             clk,
     input  logic                             rst_n,
+    input  logic                             processing_en,
     input  wire         [PIX_WIDTH-1:0]      window[K_DIM*K_DIM],
     input  logic                             window_valid,
     input  wire   signed [WGT_WIDTH-1:0]     kernel_coeffs[K_DIM*K_DIM],
     output logic  signed [PARTIAL_W - 1 : 0] partial_sum[K_DIM],
     output logic                             partial_valid
 );
+
+    // Local kernel coefficient registers
+    logic signed [WGT_WIDTH-1:0] kernel_coeff_local [K_DIM*K_DIM];
+    always_ff @(posedge clk) begin
+        if (!rst_n) begin
+            kernel_coeff_local <= '{default: 0};
+        end
+        else if (!processing_en) begin
+            kernel_coeff_local <= kernel_coeffs;
+        end
+    end
+
+
     // Pipeline Stage 1: Multiplication outputs
     logic signed [PROD_W-1:0] product_reg [K_DIM*K_DIM];
     logic                     window_valid_reg;
-    
+
+
+
     // Pipeline Stage 2: Accumulation outputs  
     logic signed [PARTIAL_W-1:0] row_sum_reg [K_DIM];
     logic                        partial_valid_reg;
+
+
 
     // 1. Multiply (Processing Elements) - COMBINATIONAL
     logic signed [PROD_W-1:0] product [K_DIM*K_DIM];
@@ -23,11 +41,12 @@ import conv_pkg::*;
         for(genvar i=0; i < K_DIM*K_DIM; i++) begin : GEN_PE
             processing_element u_PE (
                 .pixel  (window[i]),
-                .coeff  (kernel_coeffs[i]),   
+                .coeff  (kernel_coeff_local[i]),   
                 .product(product[i])
             );
         end
     endgenerate
+
 
     // 2. Register the products (PIPELINE STAGE 1)
     always_ff @(posedge clk) begin
@@ -41,6 +60,8 @@ import conv_pkg::*;
         end
     end
 
+
+
     // 3. Accumulate (Row-wise partial sums) - COMBINATIONAL
     logic signed [PARTIAL_W-1:0] row_sum [K_DIM];
     always_comb begin
@@ -51,6 +72,8 @@ import conv_pkg::*;
             end
         end
     end
+
+
 
     // 4. Register the partial sums (PIPELINE STAGE 2)
     always_ff @(posedge clk) begin

@@ -24,24 +24,20 @@ module output_ctrl
     assign end_of_row   = (col_cnt == OUT_F_W - 1);
     assign last_pixel   = (row_cnt == OUT_F_H - 1) && end_of_row;
 
-    // Single-cycle done pulse on the final output pixel
-    always_ff @(posedge clk) begin
-        if(!rst_n)
-            done <= 0;
-        else
-            done <= pixel_valid && last_pixel;
-    end
 
     always_ff @(posedge clk) begin
         if(!rst_n) begin
             row_cnt <= 0;
             col_cnt <= 0;
+            done <= 0;
+
         end
         else if (done) begin
             row_cnt <= 0;
             col_cnt <= 0;
         end
         else if(pixel_valid) begin
+            done <= last_pixel;
             if(end_of_row) begin
                 col_cnt <= 0;
 

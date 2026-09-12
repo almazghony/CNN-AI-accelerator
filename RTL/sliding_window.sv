@@ -64,24 +64,10 @@ module sliding_window
     always_ff @(posedge clk) begin
 
         if (!rst_n) begin
-
             ptr          <= '0;
             rows_filled  <= '0;
             cols_filled  <= '0;
             window_valid <= 1'b0;
-
-            for (int r = 0; r < K_DIM; r++) begin
-                for (int c = 0; c < K_DIM; c++) begin
-                    win[r][c] <= '0;
-                end
-            end
-
-            for (int r = 0; r < K_DIM-1; r++) begin
-                for (int c = 0; c < IMG_MAX_W; c++) begin
-                    lb[r][c] <= '0;
-                end
-            end
-
         end
 
         else begin

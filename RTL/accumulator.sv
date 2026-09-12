@@ -11,10 +11,8 @@ module accumulator
     logic signed [ACC_W-1:0] sum;
     always_comb begin
         sum = 0;
-        // Modern synthesis tools (Vivado/Quartus) will automatically unroll 
-        // this loop and map it into a balanced adder tree for optimal timing.
+        //adder tree
         for(int i = 0; i<K_DIM; i++)
-            // SystemVerilog automatically sign-extends partial_sum[i] to ACC_W
             sum = sum + partial_sum[i];
         conv_result = sum;
     end
