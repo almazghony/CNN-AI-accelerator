@@ -1,5 +1,5 @@
-`ifndef CONV_PKG_SV
-    `define CONV_PKG_SV
+`ifndef CONV_PKG
+    `define CONV_PKG_
 
     package conv_pkg;
 
@@ -7,6 +7,7 @@
         parameter int IMG_MAX_H = 32;
 
         parameter int K_DIM     = 3;
+
 
         // -------------------------------------------------------------------
         // Fixed-point (Q-format) precision definitions

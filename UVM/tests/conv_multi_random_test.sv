@@ -13,9 +13,10 @@
         endfunction
 
         task run_seq();
-            // frame count: +N_FRAMES=n plusarg, default 10
             int n_frames = 10;
             string s_val;
+            
+            super.run_seq();
             if ($value$plusargs("N_FRAMES=%s", s_val))
                 n_frames = s_val.atoi();
             `uvm_info("TEST", $sformatf("conv_multi_random_test: sending %0d frames (+N_FRAMES=n to override)", n_frames), UVM_LOW)

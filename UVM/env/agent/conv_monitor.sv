@@ -32,7 +32,7 @@
                 item_temp.pixel_out        <= vif.mon_cb.pixel_out;
                 item_temp.pixel_out_valid  <= vif.mon_cb.pixel_out_valid;
                 item_temp.done             <= vif.mon_cb.done;
-                item_temp.processing_en             <= vif.mon_cb.processing_en;
+                item_temp.processing_en    <= vif.mon_cb.processing_en;
 
                 item = conv_mon_item::type_id::create("item");
                 item = item_temp;

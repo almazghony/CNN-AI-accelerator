@@ -11,6 +11,7 @@
 
         task run_seq();
             conv_random_seq s = conv_random_seq::type_id::create("s");
+            super.run_seq();
             s.start(env.agt.sqr);
         endtask
     endclass

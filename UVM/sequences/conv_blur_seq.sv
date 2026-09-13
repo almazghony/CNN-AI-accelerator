@@ -12,14 +12,13 @@
             foreach (kernel[i])
                 kernel[i] = 8'sd1;
 
-            for (int r = 0; r < 32; r++)
-                for (int c = 0; c < 32; c++)
-                    image[r][c] = (r*32 + c) % 256;
-                    
-            do_reset(5);
+            for (int r = 0; r < IMG_MAX_H; r++)
+                for (int c = 0; c < IMG_MAX_W; c++)
+                    image[r][c] = (r*IMG_MAX_H + c) % $clog2(PIX_WIDTH);
             program_kernel();
             pulse_start();
             stream_image(0);
+            wait_done();
         endtask
     endclass
 

@@ -77,8 +77,8 @@ module sliding_window
             if (pixel_valid) begin
 
 
-                if ((rows_filled >= K_DIM-1) &&
-                    (cols_filled >= K_DIM-1)) begin
+                if ((rows_filled == K_DIM-1) &&
+                    (cols_filled == K_DIM-1)) begin
 
                     window_valid <= 1'b1;
 
@@ -102,14 +102,15 @@ module sliding_window
                 end
 
                 if (end_of_row) begin
+                    ptr <= 0;
+                    cols_filled <= 0;
 
-                    ptr <= '0;
-
-                    if (rows_filled < K_DIM-1) begin
+                    if(end_of_frame)
+                        rows_filled <= 0;
+                    else if (rows_filled < K_DIM-1) begin
                         rows_filled <= rows_filled + 1'b1;
                     end
 
-                    cols_filled <= '0;
 
                 end
 

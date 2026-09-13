@@ -1,6 +1,6 @@
 // conv_env.sv — agent + scoreboard
-`ifndef CONV_ENV_SV
-`define CONV_ENV_SV
+`ifndef CONV_ENV_
+`define CONV_ENV
 
 class conv_env extends uvm_env;
     `uvm_component_utils(conv_env)

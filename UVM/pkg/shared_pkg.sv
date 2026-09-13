@@ -5,7 +5,8 @@ package shared_pkg;
         TX_PROG_KERNEL, 
         TX_START, 
         TX_PIXEL, 
-        TX_IDLE_GAP
+        TX_IDLE_GAP,
+        TX_WAIT_DONE
     } conv_txn_e;
 
         parameter int IMG_MAX_W = conv_pkg::IMG_MAX_W;

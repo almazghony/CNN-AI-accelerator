@@ -38,7 +38,7 @@ import conv_pkg::*;
     // 1. Multiply (Processing Elements) - COMBINATIONAL
     logic signed [PROD_W-1:0] product [K_DIM*K_DIM];
     generate
-        for(genvar i=0; i < K_DIM*K_DIM; i++) begin : GEN_PE
+        for(genvar i = 0; i < K_DIM*K_DIM; i++) begin
             processing_element u_PE (
                 .pixel  (window[i]),
                 .coeff  (kernel_coeff_local[i]),   
@@ -65,9 +65,9 @@ import conv_pkg::*;
     // 3. Accumulate (Row-wise partial sums) - COMBINATIONAL
     logic signed [PARTIAL_W-1:0] row_sum [K_DIM];
     always_comb begin
-        for(int i=0; i<K_DIM; i++) begin
-            row_sum[i] = '0;
-            for(int j=0; j<K_DIM; j++) begin
+        for(int i = 0; i < K_DIM; i++) begin
+            row_sum[i] = 0;
+            for(int j = 0; j < K_DIM; j++) begin
                 row_sum[i] = row_sum[i] + product_reg[i*K_DIM + j];
             end
         end
@@ -78,8 +78,10 @@ import conv_pkg::*;
     // 4. Register the partial sums (PIPELINE STAGE 2)
     always_ff @(posedge clk) begin
         if(!rst_n) begin
-            partial_sum     <= '{default: 0};
-            partial_valid   <= 1'b0;
+            row_sum_reg       <= '{default: 0};
+            partial_valid_reg <= 0;
+            partial_sum       <= '{default: 0};
+            partial_valid     <= 0;
         end
         else begin
             row_sum_reg     <= row_sum;

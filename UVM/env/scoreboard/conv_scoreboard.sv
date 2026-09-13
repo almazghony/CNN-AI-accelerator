@@ -21,12 +21,8 @@ class conv_scoreboard extends uvm_scoreboard;
 
     uvm_phase sb_phase;
     bit active_frame;
+    int open_cnt; // tracks raised start_of_frame objections (never leak)
 
-    // Frame snapshot uses fixed-size arrays only (tool-safe, flattened to 1-D).
-    // Scoreboard flow: write() accumulates live state; on done it snapshots
-    // into pending_q. run_phase() drains the queue and does the blocking
-    // file-IO + $system Python call in task context (holding an objection
-    // while work is pending so the phase can'item end mid-compare).
     typedef struct {
         bit signed  [WGT_WIDTH-1:0]  krnl[K_DIM*K_DIM];
         bit         [PIX_WIDTH-1:0]  img[IMG_MAX_H*IMG_MAX_W];
@@ -38,6 +34,10 @@ class conv_scoreboard extends uvm_scoreboard;
     frame_t             pending_q[$];
 
     bit signed  [WGT_WIDTH-1:0] kernel_mem[K_DIM*K_DIM];
+    // Snapshot latched at start-of-frame. Copying kernel_mem at done
+    // time is one frame late: the next frame's kernel program can
+    // already have overwritten kernel_mem when done is sampled.
+    bit signed  [WGT_WIDTH-1:0] frame_kernel[K_DIM*K_DIM];
     bit         [PIX_WIDTH-1:0] image_mem[IMG_MAX_H*IMG_MAX_W];
     int                         input_pixel_count;
     bit signed  [OUT_W-1:0]     dut_out_arr[OUT_F_H*OUT_F_W];
@@ -58,8 +58,7 @@ class conv_scoreboard extends uvm_scoreboard;
         super.build_phase(phase);
         
         void'($value$plusargs("PY=%s", python_cmd));
-        // Track RTL package params — never hard-code golden math.
-        // conv_pkg is compiled via CNN_accelerator.sv (see uvm_files.frame).
+        // conv_pkg is compiled via CNN_accelerator.sv
         img_h     = conv_pkg::IMG_MAX_H;
         img_w     = conv_pkg::IMG_MAX_W;
         k_dim     = conv_pkg::K_DIM;
@@ -74,33 +73,43 @@ class conv_scoreboard extends uvm_scoreboard;
 
 
     function void write(conv_mon_item item);
-        if(item.start) begin
-            sb_phase.raise_objection(this, "start_of_frame");
+        if(item.start && !active_frame) begin
+            if (sb_phase != null)
+                sb_phase.raise_objection(this, "start_of_frame");
             active_frame = 1;
+            // Latch the programmed kernel for THIS frame now. Do not read
+            // kernel_mem at done time — by then the next frame's program
+            // phase may already have overwritten it.
+            foreach (kernel_mem[i])
+                frame_kernel[i] = kernel_mem[i];
         end
 
-        if(!item.rst_n)
+        if(!item.rst_n) begin
+            if (active_frame && sb_phase != null)
+                sb_phase.drop_objection(this, "reset_abort");
+            active_frame = 0;
             reset_frame();
+        end
         else begin
-            if (item.kernel_we && !item.processing_en && item.kernel_addr < 9)
+            if (item.kernel_we)
                 kernel_mem[item.kernel_addr] = item.kernel_data;
 
-            if (item.pixel_valid && input_pixel_count < 1024) begin
+            if (item.pixel_valid) begin
                 image_mem[input_pixel_count] = item.pixel_in;
                 input_pixel_count++;
             end
 
-            if (item.pixel_out_valid && output_pixel_count < 900) begin
+            if (item.pixel_out_valid) begin
                 dut_out_arr[output_pixel_count] = item.pixel_out;
                 output_pixel_count++;
             end
             
-            if (item.done) begin
+            if (item.done && active_frame) begin
                 frame_t frame;
                 int n;
 
-                foreach (kernel_mem[i]) 
-                    frame.krnl[i] = kernel_mem[i];
+                foreach (frame_kernel[i])
+                    frame.krnl[i] = frame_kernel[i];
 
                 foreach (image_mem[i])
                     frame.img[i] = image_mem[i];
@@ -117,7 +126,9 @@ class conv_scoreboard extends uvm_scoreboard;
                 reset_frame();
 
                 active_frame = 0;
-                sb_phase.drop_objection(this, "start_of_frame");
+                if (sb_phase != null)
+                    sb_phase.drop_objection(this, "start_of_frame");
+                `uvm_info("OBJECTION", "dropped the objection of the frame", UVM_HIGH)
             end
         end
     endfunction
@@ -154,10 +165,6 @@ class conv_scoreboard extends uvm_scoreboard;
         phase.drop_objection(this, "sb_drain");
     endtask
 
-    // NOTE: task (not function) — $fopen/$fwrite/$fscanf/$system are tasks.
-    // If Python is unavailable ($system return_code != 0), falls back to an internal
-    // SystemVerilog golden model (same math as golden_model.py) so the sim
-    // still self-checks without python installed.
     task check_frame_task(frame_t frame);
         
         string kernel_file;
@@ -187,9 +194,9 @@ class conv_scoreboard extends uvm_scoreboard;
         end
 
         
-        kernel_file     = $sformatf("%skernel_%0d.hex", work_dir,f_id);
-        image_file      = $sformatf("%simage_%0d.hex", work_dir,f_id);
-        expected_file   = $sformatf("%sexpected_%0d.hex", work_dir,f_id);
+        kernel_file     = $sformatf("%skernel_%0d.hex", work_dir, f_id);
+        image_file      = $sformatf("%simage_%0d.hex", work_dir, f_id);
+        expected_file   = $sformatf("%sexpected_%0d.hex", work_dir, f_id);
 
 
         //kernel file write
@@ -202,7 +209,7 @@ class conv_scoreboard extends uvm_scoreboard;
         
 
         //image file write
-        file_descriptor=$fopen(image_file, "w");
+        file_descriptor = $fopen(image_file, "w");
 
         foreach(frame.img[i])
             $fwrite(file_descriptor, "%02x\n", frame.img[i]);

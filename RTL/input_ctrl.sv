@@ -33,8 +33,6 @@ module input_ctrl
         else if (!processing_en)begin
             row_cnt         <= 0;
             col_cnt         <= 0;
-            end_of_row      <= 0;
-            end_of_frame    <= 0;
         end
         else if(accept) begin
             if(end_of_row) begin

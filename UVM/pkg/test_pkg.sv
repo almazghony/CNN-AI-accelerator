@@ -9,6 +9,7 @@ package test_pkg;
     import shared_pkg::*;
     
     `include "../sequences/conv_base_seq.sv"
+    `include "../sequences/conv_reset_seq.sv"
     `include "../sequences/conv_identity_seq.sv"
     `include "../sequences/conv_random_seq.sv"
     `include "../sequences/conv_blur_seq.sv"

@@ -39,13 +39,13 @@ module top
     logic                   output_done;
 
     // Datapath streams
-    logic [PIX_WIDTH-1:0]             ctrl_pixel_out;
+    logic [PIX_WIDTH-1:0]   ctrl_pixel_out;
     logic                   ctrl_pixel_valid;
     // logic [15:0]            row_idx;
     // logic [15:0]            col_idx;
     // logic                   image_done;
 
-    logic [PIX_WIDTH-1:0]             window [K_DIM*K_DIM];
+    logic [PIX_WIDTH-1:0]   window [K_DIM*K_DIM];
     logic                   window_valid;
     logic                   end_of_row;
     logic                   end_of_frame;
@@ -54,16 +54,16 @@ module top
     
 
     logic signed [PARTIAL_W-1:0]   partial_sum [K_DIM];
-    logic                   partial_valid;
+    logic                          partial_valid;
 
-    logic signed [ACC_W-1:0]       conv_result;
-    logic                   conv_valid;
+    logic signed [ACC_W-1:0] conv_result;
+    logic                    conv_valid;
 
-    logic signed [ACC_W-1:0]       relu_result;
-    logic                   relu_valid;
+    logic signed [ACC_W-1:0] relu_result;
+    logic                    relu_valid;
 
-    logic [OUT_W-1:0]       fmt_pixel_out;
-    logic                   fmt_pixel_valid;
+    logic [OUT_W-1:0]        fmt_pixel_out;
+    logic                    fmt_pixel_valid;
     
     // logic [15:0]            out_f_w;
     // logic [15:0]            out_f_h;

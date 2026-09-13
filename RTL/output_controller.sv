@@ -32,10 +32,6 @@ module output_ctrl
             done <= 0;
 
         end
-        else if (done) begin
-            row_cnt <= 0;
-            col_cnt <= 0;
-        end
         else if(pixel_valid) begin
             done <= last_pixel;
             if(end_of_row) begin
@@ -49,6 +45,9 @@ module output_ctrl
 
             else
                 col_cnt <= col_cnt + 1;
+        end
+        else begin
+            done <= 1'b0;
         end
     end
 

@@ -10,8 +10,8 @@
 
 
         task run_seq();
-            
             conv_blur_seq s = conv_blur_seq::type_id::create("s");
+            super.run_seq();
             s.start(env.agt.sqr);
         endtask
 

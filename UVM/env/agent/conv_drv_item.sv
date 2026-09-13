@@ -18,7 +18,7 @@
 
         constraint c_idle {
             idle_cycles inside {[0:5]}; 
-            
+            idle_cycles dist { 0:=90, [1 : 5]:/10 };
         }
 
 

@@ -15,8 +15,7 @@ module kernel_mem
 
 
     always_ff @(posedge clk)
-        //The kernel must always be programmed by software/testbench before START
-        if(!processing_en && kernel_we)
+        if(!processing_en && kernel_we && rst_n)
                 kernel_mem[kernel_addr] <= kernel_data;
 
     
