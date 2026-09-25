@@ -1,6 +1,5 @@
 module sliding_window
     import conv_pkg::*;
-
 (
     input  logic                    clk,
     input  logic                    rst_n,
@@ -19,7 +18,7 @@ module sliding_window
     localparam int PTR_WIDTH = (IMG_MAX_W <= 1) ? 1 : $clog2(IMG_MAX_W);
     localparam int ROW_WIDTH = (K_DIM <= 1) ? 1 : $clog2(K_DIM);
 
-    logic [PIX_WIDTH-1:0] lb[K_DIM-1][IMG_MAX_W];
+    logic [PIX_WIDTH-1:0] lb[0:K_DIM-2][0:IMG_MAX_W-1];
 
     logic [PTR_WIDTH-1:0] ptr;
 
@@ -31,19 +30,18 @@ module sliding_window
     logic [ROW_WIDTH-1:0] cols_filled;
 
 
-    logic [PIX_WIDTH-1:0] lb_read[K_DIM-1];
+    logic [PIX_WIDTH-1:0] lb_read[0:K_DIM-2];
 
     generate
-        for (genvar i = 0; i < K_DIM-1; i++) begin : GEN_LB_READ
+        for (genvar i = 0; i < K_DIM-1; i++)
             assign lb_read[i] = lb[i][ptr];
-        end
     endgenerate
 
 
-    logic [PIX_WIDTH-1:0] right_col_src[K_DIM];
+    logic [PIX_WIDTH-1:0] right_col_src[0:K_DIM-1];
 
-    generate
-        for (genvar r = 0; r < K_DIM; r++) begin : GEN_RIGHT_COLUMN
+    generate 
+        for (genvar r = 0; r < K_DIM; r++) begin
 
             if (r == K_DIM-1) begin
 
@@ -130,17 +128,10 @@ module sliding_window
     end
 
     generate
-
         for (genvar r = 0; r < K_DIM; r++) begin : GEN_WINDOW_R
-
             for (genvar c = 0; c < K_DIM; c++) begin : GEN_WINDOW_C
-
                 assign window[r*K_DIM+c] = win[r][c];
-
             end
-
         end
-
     endgenerate
-
 endmodule

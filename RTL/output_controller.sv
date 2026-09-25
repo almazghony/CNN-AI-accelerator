@@ -6,15 +6,13 @@ module output_ctrl
     input  logic                rst_n,
     input  logic [OUT_W-1:0]    pixel_in,
     input  logic                pixel_valid,
-    // input  logic [15:0]         out_f_w,
-    // input  logic [15:0]         out_f_h,
-    output logic [OUT_W-1:0]    pixel_out,  
+    output logic [OUT_W-1:0]    pixel_out,
     output logic                pixel_out_valid,
     output logic                done
 );
 
-    logic [15:0] row_cnt;
-    logic [15:0] col_cnt;
+    logic [4:0] row_cnt;
+    logic [4:0] col_cnt;
 
     // Output feature-map dimensions (valid convolution, stride = 1)
 

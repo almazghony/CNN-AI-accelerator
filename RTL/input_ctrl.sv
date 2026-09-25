@@ -1,11 +1,8 @@
 module input_ctrl
     import conv_pkg::*;
-
 (
     input  logic                    clk,
     input  logic                    rst_n,
-    // input  logic [15:0]             img_width,
-    // input  logic [15:0]             img_height,
     input  logic                    processing_en,
 
     
@@ -14,8 +11,6 @@ module input_ctrl
 
     output logic [PIX_WIDTH-1:0]    pixel_out,
     output logic                    pixel_out_valid,
-    // output logic [15:0]          row_idx,
-    // output logic [15:0]          col_idx,
     output logic                    end_of_row,
     output logic                    end_of_frame
 );

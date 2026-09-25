@@ -21,7 +21,6 @@ class conv_scoreboard extends uvm_scoreboard;
 
     uvm_phase sb_phase;
     bit active_frame;
-    int open_cnt; // tracks raised start_of_frame objections (never leak)
 
     typedef struct {
         bit signed  [WGT_WIDTH-1:0]  krnl[K_DIM*K_DIM];
@@ -154,15 +153,6 @@ class conv_scoreboard extends uvm_scoreboard;
             end
             phase.drop_objection(this, "sb_frame");
         end
-    endtask
-
-    task drain_q(uvm_phase phase);
-        frame_t frame;
-        while (pending_q.size() > 0) begin
-            frame = pending_q.pop_front();
-            check_frame_task(frame);
-        end
-        phase.drop_objection(this, "sb_drain");
     endtask
 
     task check_frame_task(frame_t frame);
